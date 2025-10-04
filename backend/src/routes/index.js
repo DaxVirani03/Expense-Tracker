@@ -1,11 +1,8 @@
 const authRoutes = require('./auth.routes');
-// TODO: Import other routes as they are created
-// const userRoutes = require('./user.routes');
-// const expenseRoutes = require('./expense.routes');
-// const approvalRoutes = require('./approval.routes');
-// const ruleRoutes = require('./rule.routes');
-// const uploadRoutes = require('./upload.routes');
-// const companyRoutes = require('./company.routes');
+const userRoutes = require('./user.routes');
+const expenseRoutes = require('./expense.routes');
+const companyRoutes = require('./company.routes');
+const dashboardRoutes = require('./dashboard.routes');
 
 const setupRoutes = (app) => {
   const API_VERSION = process.env.API_VERSION || 'v1';
@@ -13,13 +10,17 @@ const setupRoutes = (app) => {
   // Auth routes
   app.use(`/api/${API_VERSION}/auth`, authRoutes);
 
-  // TODO: Add other routes
-  // app.use(`/api/${API_VERSION}/users`, userRoutes);
-  // app.use(`/api/${API_VERSION}/expenses`, expenseRoutes);
-  // app.use(`/api/${API_VERSION}/approvals`, approvalRoutes);
-  // app.use(`/api/${API_VERSION}/rules`, ruleRoutes);
-  // app.use(`/api/${API_VERSION}/uploads`, uploadRoutes);
-  // app.use(`/api/${API_VERSION}/company`, companyRoutes);
+  // User routes
+  app.use(`/api/${API_VERSION}/users`, userRoutes);
+
+  // Expense routes
+  app.use(`/api/${API_VERSION}/expenses`, expenseRoutes);
+
+  // Company routes
+  app.use(`/api/${API_VERSION}/company`, companyRoutes);
+
+  // Dashboard routes
+  app.use(`/api/${API_VERSION}/dashboard`, dashboardRoutes);
 };
 
 module.exports = setupRoutes;

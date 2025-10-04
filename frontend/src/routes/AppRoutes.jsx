@@ -8,13 +8,9 @@ import Signup from '../pages/auth/Signup';
 import ForgotPassword from '../pages/auth/ForgotPassword';
 import ResetPassword from '../pages/auth/ResetPassword';
 
-// Dashboard (placeholder - to be created)
-const Dashboard = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold">Dashboard</h1>
-    <p className="mt-4 text-gray-600">Welcome to ExpenseFlow!</p>
-  </div>
-);
+// Import Dashboard component
+import Dashboard from '../pages/Dashboard';
+import ExpenseForm from '../pages/ExpenseForm';
 
 const AppRoutes = () => {
   return (
@@ -31,6 +27,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/expenses/new"
+        element={
+          <ProtectedRoute>
+            <ExpenseForm />
           </ProtectedRoute>
         }
       />
