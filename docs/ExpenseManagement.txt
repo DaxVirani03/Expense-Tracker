@@ -1,0 +1,280 @@
+Overview
+
+Project name: ExpenseFlow — Intelligent Expense Management System
+Goal: Streamline company expense reimbursements by digitizing submissions, automating multi-level approvals, and ensuring transparency with flexible rules and OCR support.
+Tech stack: MERN (MongoDB, Express, React, Node). OCR via Tesseract.js or Google Vision API. Currency conversion via exchangerate-api. Country & currency mapping via restcountries API.
+
+1. Scope & Priorities (MVP vs Optional)
+
+MVP (Week 1–2):
+
+Auth (signup/login/forgot/reset)
+Company auto-creation on signup (default country + currency set)
+Role-based users (Employee, Manager, Admin)
+Employee expense submission (amount, currency, category, description, date)
+Manager approval/rejection workflow
+Multi-level approval (sequence defined by admin)
+Admin dashboard: manage employees/managers, configure approval rules, view all expenses
+Expense history (per employee)
+Basic reports (approved/rejected/pending expenses)
+Basic UI (responsive)
+
+Nice-to-have (Week 3 / later):
+
+Conditional approval rules (percentage rule, specific approver rule, hybrid)
+OCR for receipt auto-reading
+Finance & Director roles in approval chain
+Escalation logic for unapproved expenses
+Currency conversion support for cross-currency expenses
+Analytics dashboard (spend by category, employee, department)
+Notifications (email/SMS)
+Audit logs for compliance
+
+2. User Roles & Permissions
+
+Anonymous / Visitor: N/A (system is company-internal).
+
+Employee: Submit expenses with receipts, view expense history, check status.
+
+Manager: Approve/reject team expenses, view team expense history, escalate as per rules.
+
+Admin: Auto-created on signup, manages company settings, users, roles, approval rules, overrides approvals, sees all company expenses.
+
+3. High-level User Flows
+
+Expense Submission (Employee)
+
+Login as Employee → Submit new Expense (amount, category, description, date, receipt upload) → Stored in DB (status=pending, sent to assigned Manager).
+
+Approval Workflow (Manager/Admin)
+
+Manager receives approval request → views expense → approves/rejects with comment → status updated → if approved and more approvers remain → request sent to next approver.  
+If rejected, expense closed with status=rejected.  
+Admin can override approvals at any stage.
+
+Conditional Approval Flow (Advanced)
+
+Admin defines rules:  
+- Percentage: Expense approved if ≥60% approvers approve.  
+- Specific approver: e.g., CFO approval auto-approves regardless of others.  
+- Hybrid: 60% OR CFO.  
+
+4. Data Models (Mongoose-like schemas)
+
+User
+
+{
+  _id: ObjectId,
+  name: String,
+  email: { type: String, unique: true, index: true },
+  passwordHash: String,
+  role: { type: String, enum: ['employee','manager','admin'], default: 'employee' },
+  managerId: ObjectId, // if employee
+  companyId: ObjectId,
+  createdAt: Date,
+  updatedAt: Date
+}
+
+Company
+
+{
+  _id: ObjectId,
+  name: String,
+  country: String,
+  defaultCurrency: String,
+  createdBy: ObjectId, // admin id
+  createdAt: Date
+}
+
+Expense
+
+{
+  _id: ObjectId,
+  employeeId: ObjectId (ref User),
+  companyId: ObjectId,
+  amount: Number,
+  currency: String,
+  category: String,
+  description: String,
+  date: Date,
+  receiptUrl: String,
+  status: { type: String, enum: ['pending','approved','rejected'], default:'pending' },
+  approvers: [ObjectId], // list of userIds in sequence
+  approvalHistory: [{
+    approverId: ObjectId,
+    decision: String, // approved/rejected
+    comment: String,
+    decidedAt: Date
+  }],
+  finalDecision: String, // auto-computed after rules applied
+  createdAt: Date,
+  updatedAt: Date
+}
+
+ApprovalRule
+
+{
+  _id: ObjectId,
+  companyId: ObjectId,
+  type: { type: String, enum: ['sequence','percentage','specific','hybrid'], default:'sequence' },
+  percentageThreshold: Number, // for percentage
+  specificApproverId: ObjectId, // for specific rule
+  createdAt: Date
+}
+
+5. API Blueprint (versioned: /api/v1/)
+
+Auth
+POST /api/v1/auth/register — register company admin
+POST /api/v1/auth/login — login
+POST /api/v1/auth/forgot-password — send reset email
+POST /api/v1/auth/reset-password — reset
+
+Users
+POST /api/v1/users — create employee/manager (admin only)
+PUT /api/v1/users/:id — update role or manager mapping (admin only)
+GET /api/v1/users/:id/expenses — get employee expense history
+
+Expenses
+POST /api/v1/expenses — create new expense (employee only)
+GET /api/v1/expenses — list expenses (filters: status, employeeId, category)
+GET /api/v1/expenses/:id — expense detail
+PUT /api/v1/expenses/:id/approve — approve (manager/admin)
+PUT /api/v1/expenses/:id/reject — reject (manager/admin)
+
+Approval Rules
+POST /api/v1/approval-rules — create/update approval rules (admin only)
+GET /api/v1/approval-rules — fetch rules for company
+
+Company
+GET /api/v1/company — get company info (admin only)
+
+Uploads
+POST /api/v1/uploads/receipt — upload expense receipt (OCR optional)
+
+Utilities
+GET /api/v1/utils/currencies — fetch supported currencies
+GET /api/v1/utils/exchange/:base — fetch rates
+
+6. Storage & File Upload Strategy
+
+Receipts stored in Cloudinary/S3 with links in expense record.  
+Optional OCR: Extract text fields (amount, date, description, vendor name).
+
+7. Approval Engine
+
+Sequential: Approvals follow defined order.  
+Conditional: Evaluate based on defined rule type (percentage, specific approver, hybrid).  
+Admin override: Admin can set status=approved or rejected at any stage.
+
+8. Frontend Architecture & Components
+
+React + Vite, react-router-dom, axios, react-query, react-hook-form, tailwindcss.  
+Pages:  
+/login, /signup  
+/dashboard (role-specific view)  
+/expenses/new (employee)  
+/expenses (employee history, manager approvals)  
+/admin/users, /admin/rules, /admin/reports  
+
+Components:  
+ExpenseCard, ExpenseForm, ApprovalList, ReceiptUploader, RuleConfigurator, DashboardCharts
+
+9. Security Checklist
+
+Use JWT for auth, bcrypt for password hashing, helmet & CORS.  
+Role-based access control (admin/manager/employee).  
+Limit file type & size for receipts.  
+Input validation with Joi.  
+Audit logs for all approvals.
+
+10. Testing Strategy
+
+Unit tests: Expense calculations, approval engine.  
+Integration tests: End-to-end expense submission & approval.  
+E2E: Cypress for major flows (employee submit, manager approve, admin override).
+
+11. Deployment Plan
+
+DB: MongoDB Atlas  
+Backend: Render/Heroku/Railway  
+Frontend: Vercel/Netlify  
+Storage: Cloudinary/S3  
+OCR: Google Vision API (optional)  
+Currency APIs: restcountries & exchangerate-api
+
+12. Monitoring & Logging
+
+Logs via Winston. Errors tracked with Sentry.  
+Audit logs for compliance.  
+Metrics: number of expenses submitted, approval latency, rejection rates.
+
+13. Acceptance Criteria (MVP)
+
+Admin auto-created on signup with company.  
+Employees can submit expenses.  
+Managers can approve/reject.  
+Admin can configure approval sequences.  
+Expenses move through approval workflow correctly.  
+History visible to employee.  
+Basic reporting dashboard.
+
+14. Future Enhancements
+
+OCR auto-extraction for receipts.  
+Conditional approval rules (percentage/hybrid).  
+Finance & Director roles.  
+Cross-currency conversion.  
+Slack/email notifications.  
+Advanced analytics.  
+AI-based anomaly detection for fraud prevention.
+
+15. Enterprise Features (Robustness & Compliance)
+
+- Single Sign-On (SSO) with Google Workspace, Azure AD, or OAuth2 providers.
+- Immutable audit logs for compliance (SOX/GDPR), stored in append-only log service.
+- End-to-end encryption: sensitive fields encrypted at rest, TLS enforced for transit.
+- Rate limiting and brute-force protection on auth endpoints.
+- Delegated approvals: managers can delegate their approval rights when unavailable.
+- Multi-language support (react-i18next for frontend).
+
+16. Scalability & System Design Enhancements
+
+- Microservices split (future-ready):
+  * Auth Service
+  * Expense Service
+  * Approval Engine Service
+- Asynchronous jobs: use RabbitMQ/Kafka for OCR, notifications, and approval flows.
+- Redis caching for employee profiles, frequently accessed data, currency exchange rates.
+- ElasticSearch integration for full-text search on expenses and receipts.
+- Offline-first submission (queue expenses locally and sync later).
+
+17. Analytics & Intelligence
+
+- Fraud & anomaly detection using ML models (e.g., detect duplicate or outlier expenses).
+- Budget tracking per department/project with threshold alerts.
+- Predictive analytics to forecast monthly/quarterly expenses based on history.
+- Department-level and role-based reporting dashboards.
+
+18. Developer Experience & CI/CD
+
+- API documentation with Swagger/OpenAPI auto-generation.
+- Complete Postman collection for all endpoints and workflows.
+- GitHub Actions for CI/CD: run tests, lint, build, and deploy automatically.
+- Load and performance testing using k6/Locust to simulate thousands of expense submissions.
+
+19. Deployment & Reliability Enhancements
+
+- Multi-tenant architecture: isolate company data either by row-level security or separate DBs.
+- Monitoring & metrics: Prometheus + Grafana dashboards for real-time monitoring of API and DB performance.
+- Centralized error handling & logging across backend services with Winston and Sentry.
+- Automated daily backups for MongoDB and receipt storage buckets.
+- Disaster recovery strategy: hot backups and failover nodes.
+
+20. Final Acceptance Criteria for Robust System
+
+- Secure, multi-tenant, and compliant system deployable for enterprise clients.
+- High availability with monitored services and automated failover.
+- Support for advanced workflows, anomaly detection, and multilingual access.
+- Scalable design able to serve multiple companies with thousands of employees each.
+- Complete developer handover with CI/CD pipelines, monitoring, and documentation.
