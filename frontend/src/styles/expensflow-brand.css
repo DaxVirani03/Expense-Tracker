@@ -1,0 +1,290 @@
+/* ExpenseFlow Brand Styles */
+
+/* Brand Colors */
+.expenseflow-blue {
+  color: #3A7AFE;
+}
+
+.expenseflow-green {
+  color: #2ECC71;
+}
+
+.expenseflow-red {
+  color: #EF4444;
+}
+
+.expenseflow-gray {
+  color: #6B7280;
+}
+
+.bg-expenseflow-blue {
+  background-color: #3A7AFE;
+}
+
+.bg-expenseflow-green {
+  background-color: #2ECC71;
+}
+
+.bg-expenseflow-red {
+  background-color: #EF4444;
+}
+
+.bg-expenseflow-gray {
+  background-color: #6B7280;
+}
+
+.bg-expenseflow-bg {
+  background-color: #F5F6FA;
+}
+
+/* Logo Styles */
+.expenseflow-logo {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #3A7AFE;
+  text-decoration: none;
+}
+
+.expenseflow-logo:hover {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+/* Card Styles */
+.expenseflow-card {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.expenseflow-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Button Styles */
+.expenseflow-btn-primary {
+  background: linear-gradient(135deg, #3A7AFE 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(58, 122, 254, 0.3);
+}
+
+.expenseflow-btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px -1px rgba(58, 122, 254, 0.4);
+}
+
+.expenseflow-btn-primary:active {
+  transform: translateY(0);
+}
+
+.expenseflow-btn-secondary {
+  background: white;
+  color: #3A7AFE;
+  border: 2px solid #3A7AFE;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.expenseflow-btn-secondary:hover {
+  background: #3A7AFE;
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Form Styles */
+.expenseflow-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.expenseflow-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.expenseflow-form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #D1D5DB;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.expenseflow-form-input:focus {
+  outline: none;
+  border-color: #3A7AFE;
+  box-shadow: 0 0 0 3px rgba(58, 122, 254, 0.1);
+}
+
+.expenseflow-form-input.error {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.expenseflow-form-error {
+  color: #EF4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* Layout Styles */
+.expenseflow-container {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.expenseflow-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #F5F6FA 0%, #E5E7EB 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+/* Animation Classes */
+.expenseflow-fade-in {
+  animation: expenseflowFadeIn 0.5s ease-in;
+}
+
+.expenseflow-slide-up {
+  animation: expenseflowSlideUp 0.3s ease-out;
+}
+
+@keyframes expenseflowFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes expenseflowSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading States */
+.expenseflow-loading {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 50%;
+  border-top-color: #3A7AFE;
+  animation: expenseflowSpin 1s ease-in-out infinite;
+}
+
+@keyframes expenseflowSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Success States */
+.expenseflow-success-icon {
+  color: #2ECC71;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto;
+}
+
+.expenseflow-success-message {
+  text-align: center;
+  color: #2ECC71;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+/* Error States */
+.expenseflow-error-icon {
+  color: #EF4444;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto;
+}
+
+.expenseflow-error-message {
+  text-align: center;
+  color: #EF4444;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .expenseflow-container {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .expenseflow-card {
+    padding: 1.5rem;
+  }
+
+  .expenseflow-logo {
+    font-size: 1.5rem;
+  }
+}
+
+/* Utility Classes */
+.expenseflow-text-primary {
+  color: #3A7AFE;
+}
+
+.expenseflow-text-success {
+  color: #2ECC71;
+}
+
+.expenseflow-text-error {
+  color: #EF4444;
+}
+
+.expenseflow-text-gray {
+  color: #6B7280;
+}
+
+.expenseflow-bg-primary {
+  background-color: #3A7AFE;
+}
+
+.expenseflow-bg-success {
+  background-color: #2ECC71;
+}
+
+.expenseflow-bg-error {
+  background-color: #EF4444;
+}
+
+.expenseflow-bg-gray {
+  background-color: #6B7280;
+}

@@ -278,3 +278,103 @@ AI-based anomaly detection for fraud prevention.
 - Support for advanced workflows, anomaly detection, and multilingual access.
 - Scalable design able to serve multiple companies with thousands of employees each.
 - Complete developer handover with CI/CD pipelines, monitoring, and documentation.
+
+21. UI/UX Specifications - Login & Admin Signup Pages
+
+I. Overall Theme and Branding
+
+Platform Name: ExpenseFlow
+Aesthetic: Clean, modern, professional, enterprise-friendly, trust-building
+Colors: Primary blue (#3A7AFE), teal/green (#2ECC71 for accents/highlights), neutral gray backgrounds (#F5F6FA)
+Typography: Modern sans-serif (Inter, Poppins, or Roboto)
+UI Elements: White space, rounded cards/containers for forms, subtle shadows
+
+II. Admin (Company) Signup Page
+
+1. Page Title: "Admin (company) Signup Page"
+
+2. Company-Specific Information:
+- Text: "1 admin user per company" (constraint/rule for signup flow)
+
+3. Input Fields (top to bottom):
+- Name: Standard text input for admin's name
+- Email: Standard text input for admin's email
+- Password: Password input field (masked characters)
+- Confirm password: Password input field for confirmation
+- Country selection: Dropdown of all world countries
+  - CRITICAL BUSINESS LOGIC: Selected country's currency becomes company's base currency
+  - Once set, base currency should be immutable or admin-only changeable
+  - UI should indicate importance (info icon, explanatory text)
+
+4. Call-to-Action Button: "Signup" (primary action)
+
+5. Navigation: "Already have an account? Login" link (expected for UX)
+
+III. Login Page
+
+1. Page Title: "Signin Page"
+
+2. Input Fields (top to bottom):
+- Email: Standard text input for user's email
+- Password: Password input field (masked characters)
+
+3. Call-to-Action Button: "Login" (primary action)
+
+4. Navigation Links (bottom):
+- "Don't have an account? Signup": Link to signup page
+- "Forgot password?": Link for password recovery
+
+IV. Catches and Considerations
+
+1. Admin vs General User Signup:
+- "Admin (Company) Signup" is for company creation (1 admin per company)
+- May need separate flows for regular employee invites
+- Landing page "Start Free Trial" should lead to admin signup
+- Clear differentiation needed if multiple signup types exist
+
+2. Country Selection & Base Currency:
+- Foundational setting for entire platform
+- Should be immutable after company creation
+- UI must convey importance of this choice
+- Consider IP-based default selection
+- Add validation and confirmation step
+
+3. Password Requirements:
+- Implement strength indicators (Weak/Medium/Strong)
+- Real-time validation for requirements
+- Clear error messages for policy violations
+
+4. Error Handling & Feedback:
+- Clear error messages for invalid credentials
+- Field-level validation with red borders
+- Success/error states for form submissions
+- Loading states during API calls
+
+5. Forgot Password Flow:
+- Email input page
+- Token verification page
+- New password setup page
+- All matching ExpenseFlow theme
+
+6. Navigation Consistency:
+- Bidirectional links between login/signup
+- Clear user flow paths
+- Accessible navigation options
+
+V. Business Logic Implications
+
+1. Company Creation:
+- Admin signup auto-creates company
+- Country selection sets base currency permanently
+- Admin becomes company owner with full permissions
+
+2. Authentication Flow:
+- JWT-based session management
+- Role-based access control
+- Secure password hashing and validation
+
+3. User Experience:
+- Intuitive form layouts
+- Progressive disclosure of information
+- Clear success/error feedback
+- Mobile-responsive design

@@ -1,0 +1,625 @@
+# ExpenseFlow API Endpoints Checklist
+
+**Project**: ExpenseFlow - Intelligent Expense Management System
+**Date**: October 4, 2025
+**API Version**: v1
+**Base URL**: http://localhost:5000/api/v1
+
+---
+
+## 🔐 Authentication Endpoints
+
+### 1. POST /auth/register
+**Purpose**: Register new admin user and create company
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Public
+
+**Request Body**:
+```json
+{
+  "name": "John Doe",
+  "email": "admin@company.com",
+  "password": "SecurePass123!",
+  "country": "United States",
+  "companyName": "Tech Solutions Inc"
+}
+```
+
+**Response (201)**:
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Admin registered successfully",
+  "data": {
+    "user": {
+      "_id": "...",
+      "name": "John Doe",
+      "email": "admin@company.com",
+      "role": "admin",
+      "companyId": "..."
+    },
+    "company": {
+      "name": "Tech Solutions Inc",
+      "country": "United States",
+      "defaultCurrency": "USD"
+    },
+    "token": "jwt_token_here"
+  },
+  "timestamp": "2025-10-04T..."
+}
+```
+
+**Testing Checkpoints**:
+- [ ] Valid registration creates user and company
+- [ ] Password is hashed (not stored in plain text)
+- [ ] JWT token is returned
+- [ ] Email uniqueness validation works
+- [ ] Invalid email format rejected
+- [ ] Missing required fields return 400 error
+- [ ] User role set to 'admin' automatically
+
+---
+
+### 2. POST /auth/login
+**Purpose**: Authenticate user and return JWT token
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Public
+
+**Request Body**:
+```json
+{
+  "email": "admin@company.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Response (200)**:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "_id": "...",
+      "name": "John Doe",
+      "email": "admin@company.com",
+      "role": "admin",
+      "companyId": "..."
+    },
+    "company": {
+      "name": "Tech Solutions Inc",
+      "country": "United States",
+      "defaultCurrency": "USD"
+    },
+    "token": "jwt_token_here"
+  },
+  "timestamp": "2025-10-04T..."
+}
+```
+
+**Testing Checkpoints**:
+- [ ] Valid credentials return JWT token
+- [ ] Invalid credentials return 401 error
+- [ ] Last login timestamp updated
+- [ ] Company data included in response
+- [ ] Password field excluded from user object
+- [ ] Inactive users cannot login
+
+---
+
+### 3. POST /auth/logout
+**Purpose**: Logout user (client-side token removal)
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Private (JWT token required)
+
+**Request Body**: None (token in Authorization header)
+
+**Response (200)**:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Logout successful",
+  "timestamp": "2025-10-04T..."
+}
+```
+
+**Testing Checkpoints**:
+- [ ] Requires valid JWT token
+- [ ] Invalid token returns 401 error
+- [ ] Logs logout action
+- [ ] Client should remove token from storage
+
+---
+
+### 4. GET /auth/me
+**Purpose**: Get current authenticated user profile
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Private (JWT token required)
+
+**Request Body**: None (token in Authorization header)
+
+**Response (200)**:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "User profile fetched successfully",
+  "data": {
+    "_id": "...",
+    "name": "John Doe",
+    "email": "admin@company.com",
+    "role": "admin",
+    "companyId": {
+      "name": "Tech Solutions Inc",
+      "country": "United States",
+      "defaultCurrency": "USD"
+    },
+    "department": null,
+    "isActive": true,
+    "createdAt": "2025-10-04T..."
+  },
+  "timestamp": "2025-10-04T..."
+}
+```
+
+**Testing Checkpoints**:
+- [ ] Requires valid JWT token
+- [ ] Returns user data with populated company info
+- [ ] Password field excluded from response
+- [ ] Invalid token returns 401 error
+- [ ] Inactive users return 401 error
+
+---
+
+### 5. POST /auth/forgot-password
+**Purpose**: Send password reset email
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Public
+
+**Request Body**:
+```json
+{
+  "email": "admin@company.com"
+}
+```
+
+**Response (200)**:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "If an account exists, a password reset link has been sent",
+  "data": {
+    "resetToken": "hashed_token_for_dev_testing",
+    "resetUrl": "http://localhost:3000/reset-password/hashed_token"
+  },
+  "timestamp": "2025-10-04T..."
+}
+```
+
+**Testing Checkpoints**:
+- [ ] Accepts any email format (security - doesn't reveal if user exists)
+- [ ] Generates reset token for existing users
+- [ ] Sets token expiry (30 minutes)
+- [ ] Returns token in development mode
+- [ ] Logs password reset request
+
+---
+
+### 6. POST /auth/reset-password/:token
+**Purpose**: Reset password using reset token
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Public
+
+**Request Body**:
+```json
+{
+  "password": "NewSecurePass123!"
+}
+```
+
+**Response (200)**:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Password reset successful",
+  "data": {
+    "token": "new_jwt_token_here"
+  },
+  "timestamp": "2025-10-04T..."
+}
+```
+
+**Testing Checkpoints**:
+- [ ] Valid token accepts password reset
+- [ ] Invalid token returns 400 error
+- [ ] Expired token returns 400 error
+- [ ] New password is hashed
+- [ ] Reset token fields cleared after use
+- [ ] Returns new JWT token
+- [ ] Password validation enforced
+
+---
+
+### 7. PUT /auth/change-password
+**Purpose**: Change password for authenticated user
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Private (JWT token required)
+
+**Request Body**:
+```json
+{
+  "currentPassword": "CurrentPass123!",
+  "newPassword": "NewSecurePass456!"
+}
+```
+
+**Response (200)**:
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Password changed successfully",
+  "timestamp": "2025-10-04T..."
+}
+```
+
+**Testing Checkpoints**:
+- [ ] Requires valid JWT token
+- [ ] Current password verification required
+- [ ] New password is hashed
+- [ ] Invalid current password returns 401 error
+- [ ] Logs password change action
+
+---
+
+## 👥 User Management Endpoints
+
+### 8. GET /users
+**Purpose**: Get all users (Admin/Manager only)
+**Status**: 🔄 STRUCTURED (Routes defined, controller pending)
+**Authentication**: Private (JWT token + Role-based)
+
+### 9. GET /users/:id
+**Purpose**: Get user by ID
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 10. POST /users
+**Purpose**: Create new user (Admin/Manager only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+### 11. PUT /users/:id
+**Purpose**: Update user
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 12. DELETE /users/:id
+**Purpose**: Delete user (Admin only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+### 13. PUT /users/profile
+**Purpose**: Update user profile
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+---
+
+## 🏢 Company Management Endpoints
+
+### 14. GET /company
+**Purpose**: Get company details
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 15. PUT /company
+**Purpose**: Update company settings
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Admin only
+
+---
+
+## 💰 Expense Management Endpoints
+
+### 16. GET /expenses
+**Purpose**: Get all expenses with filtering
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+**Query Parameters**:
+- status, category, dateFrom, dateTo, userId, page, limit
+
+### 17. GET /expenses/:id
+**Purpose**: Get expense by ID
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 18. POST /expenses
+**Purpose**: Create new expense
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 19. PUT /expenses/:id
+**Purpose**: Update expense
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 20. DELETE /expenses/:id
+**Purpose**: Delete expense
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 21. POST /expenses/:id/receipt
+**Purpose**: Upload receipt file
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 22. POST /expenses/:id/approve
+**Purpose**: Approve expense (Manager/Admin only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+### 23. POST /expenses/:id/reject
+**Purpose**: Reject expense (Manager/Admin only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+---
+
+## 📊 Reporting Endpoints
+
+### 24. GET /reports/summary
+**Purpose**: Get expense summary statistics
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 25. GET /reports/by-category
+**Purpose**: Get expenses grouped by category
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 26. GET /reports/by-user
+**Purpose**: Get expenses grouped by user
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 27. GET /reports/by-department
+**Purpose**: Get expenses grouped by department
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 28. GET /reports/export
+**Purpose**: Export report data
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+---
+
+## 📁 Category Management Endpoints
+
+### 29. GET /categories
+**Purpose**: Get all expense categories
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 30. GET /categories/:id
+**Purpose**: Get category by ID
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 31. POST /categories
+**Purpose**: Create new category (Admin/Manager only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+### 32. PUT /categories/:id
+**Purpose**: Update category (Admin/Manager only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+### 33. DELETE /categories/:id
+**Purpose**: Delete category (Admin only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+---
+
+## 🏗️ Department Management Endpoints
+
+### 34. GET /departments
+**Purpose**: Get all departments
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 35. GET /departments/:id
+**Purpose**: Get department by ID
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 36. POST /departments
+**Purpose**: Create new department (Admin/Manager only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+### 37. PUT /departments/:id
+**Purpose**: Update department (Admin/Manager only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+### 38. DELETE /departments/:id
+**Purpose**: Delete department (Admin only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+---
+
+## 📈 Dashboard Endpoints
+
+### 39. GET /dashboard/stats
+**Purpose**: Get dashboard statistics
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 40. GET /dashboard/recent-expenses
+**Purpose**: Get recent expenses for dashboard
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private
+
+### 41. GET /dashboard/pending-approvals
+**Purpose**: Get pending approvals (Manager/Admin only)
+**Status**: 🔄 STRUCTURED
+**Authentication**: Private + Role-based
+
+---
+
+## 🏥 Health Check Endpoints
+
+### 42. GET /health
+**Purpose**: Server health check
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Public
+
+**Response (200)**:
+```json
+{
+  "success": true,
+  "message": "Server is healthy",
+  "timestamp": "2025-10-04T...",
+  "uptime": 123.45
+}
+```
+
+**Testing Checkpoints**:
+- [ ] Returns 200 status
+- [ ] Includes timestamp
+- [ ] No authentication required
+
+### 43. GET /api/v1
+**Purpose**: API information endpoint
+**Status**: ✅ IMPLEMENTED
+**Authentication**: Public
+
+**Response (200)**:
+```json
+{
+  "success": true,
+  "message": "ExpenseFlow API",
+  "version": "v1",
+  "documentation": "/api/v1/docs"
+}
+```
+
+---
+
+## 🔒 Security & Middleware Testing
+
+### Authentication Middleware
+- [ ] JWT token validation works
+- [ ] Invalid tokens return 401
+- [ ] Expired tokens return 401
+- [ ] Missing tokens return 401
+- [ ] Token tampering detected
+
+### Role-Based Access Control
+- [ ] Admin routes reject non-admin users
+- [ ] Manager routes reject employee users
+- [ ] Employee routes accessible to all roles
+- [ ] Company access isolation works
+
+### Rate Limiting
+- [ ] Auth endpoints rate limited (5 requests/15min)
+- [ ] API endpoints rate limited (100 requests/15min)
+- [ ] Rate limit headers included in responses
+
+### Input Validation & Sanitization
+- [ ] MongoDB injection prevention
+- [ ] XSS protection active
+- [ ] SQL injection protection (MongoDB)
+- [ ] Input sanitization working
+
+### CORS Configuration
+- [ ] Frontend origin allowed
+- [ ] Credentials enabled
+- [ ] Preflight requests handled
+
+### Error Handling
+- [ ] 400 errors for bad requests
+- [ ] 401 errors for authentication failures
+- [ ] 403 errors for authorization failures
+- [ ] 404 errors for not found resources
+- [ ] 422 errors for validation failures
+- [ ] 500 errors for server errors
+- [ ] Error messages don't leak sensitive info
+
+---
+
+## 🧪 Testing Commands
+
+### Backend Testing
+```bash
+# Start backend server
+cd backend && npm run dev
+
+# Test with curl
+curl -X POST http://localhost:5000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test Admin","email":"test@company.com","password":"TestPass123!","country":"United States","companyName":"Test Company"}'
+
+# Health check
+curl http://localhost:5000/health
+```
+
+### Frontend Testing
+```bash
+# Start frontend server
+cd frontend && npm run dev
+
+# Open browser to http://localhost:3001
+# Test registration, login, password reset flows
+```
+
+### Database Testing
+```bash
+# Connect to MongoDB
+mongosh mongodb://localhost:27017/expense-tracker
+
+# Check collections
+db.users.find()
+db.companies.find()
+```
+
+---
+
+## 📋 Implementation Status Summary
+
+- ✅ **COMPLETED**: 7 Authentication endpoints + 2 Health endpoints
+- 🔄 **STRUCTURED**: 34 Additional endpoints (routes defined, controllers pending)
+- 📝 **TOTAL**: 43 API endpoints defined
+
+**Legend**:
+- ✅ IMPLEMENTED: Controller logic, validation, error handling complete
+- 🔄 STRUCTURED: Routes defined, basic structure ready for implementation
+- ❌ PENDING: Not yet implemented
+
+---
+
+**Next Steps**:
+1. Implement remaining controllers for user, expense, company management
+2. Add comprehensive input validation and sanitization
+3. Implement file upload handling for receipts
+4. Add email service integration for password reset
+5. Implement audit logging for all operations
+6. Add comprehensive API documentation (Swagger/OpenAPI)
+7. Implement rate limiting and security headers
+8. Add comprehensive error handling and logging
+
+---
+
+**Date**: October 4, 2025
+**Status**: Authentication APIs ✅ COMPLETE | Full System 🔄 IN PROGRESS
